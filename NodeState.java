@@ -1,0 +1,6 @@
+public enum NodeState {
+    INITIAL,
+    SEARCH_MWOE,
+    WAIT_FOR_MWOE_BROADCAST,
+    WAIT_FOR_COMPONENT_MERGE
+}
