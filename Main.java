@@ -7,8 +7,7 @@ import java.util.ArrayList;
 public class Main {
 
    public static void main(String[] args) throws IOException {
-
-        
+   
         // reading the config file
         String filePath = args[0];
         Integer numNodes = 0;
