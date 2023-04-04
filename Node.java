@@ -251,7 +251,6 @@ public class Node {
                 try {
                     while (!this.synchGHSComplete) {
                         Socket clientSocket = serverSocket.accept();
-
                         Thread clientThread = new Thread(() -> {
                             try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
                                 Message message;
@@ -263,6 +262,7 @@ public class Node {
                                 e.printStackTrace();
                             }
                         });
+                        
                         clientThread.start();
                     }
                 } catch (IOException e) {
