@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -274,11 +275,31 @@ public class Node {
     }
 
     public void sendMessageTCP(Message message, String host, int port) throws IOException {
-        try (Socket socket = new Socket(host, port);
-        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
-            output.writeObject(message);
+        int retryInterval = 5000;
+        int maxRetries = 5;
+        int retries = 0;
+        while (retries <= maxRetries) {
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress(host, port), retryInterval);
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                output.writeObject(message);
+                output.flush();
+                return;
+            } catch (IOException e) {
+                retries++;
+                if (retries > maxRetries) {
+                    throw e; // throw the exception if max retries have been reached
+                }
+                try {
+                    Thread.sleep(retryInterval);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
+    
+    
 
     private void sendMessage(Message inputMessage,int targetUID){
         //logic to send message
