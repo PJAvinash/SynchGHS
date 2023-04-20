@@ -24,7 +24,7 @@ do
     continue
   fi
   echo "Connecting to $remotehost ..."
-  gnome-terminal -- bash -c "ssh -f $netID@$remotehost; exec bash"
+  gnome-terminal -e "ssh -f $netID@$remotehost; exec bash"
 done
 
 echo "completed connection test"
@@ -38,6 +38,6 @@ do
     continue
   fi
   echo "Starting main in $remotehost ..."
-  gnome-terminal -- bash -c "ssh -f $netID@$remotehost \"cd DSProject2/SynchGHS && java Main Launcher/$1\"; exec bash"
+  gnome-terminal -e "ssh -f $netID@$remotehost \"cd DSProject2/SynchGHS && java Main Launcher/$1\"; exec bash"
   sleep 1
 done
