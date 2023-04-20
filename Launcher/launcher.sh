@@ -2,6 +2,8 @@
 
 configPath=$1
 
+netID = jxp220032
+
 # Get the hostname of the current machine
 host=$(hostname)
 
@@ -20,7 +22,7 @@ do
     continue
   fi
   echo "Connecting to $node ..."
-  ssh $node "cd .. && javac Main.java "
+  ssh $netID@$node "cd .. && javac Main.java "
 done
 
 # Loop through the nodes and execute a command over SSH
@@ -31,6 +33,6 @@ do
     continue
   fi
   echo "Connecting to $node ..."
-  ssh -f $node "java Main $configPath"
+  ssh -f $netID@$node "java Main $configPath"
   sleep 1
 done

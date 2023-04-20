@@ -1,5 +1,9 @@
 #!/bin/bash
+
 configPath=$1
+
+netID = jxp220032
+
 # Get the PIDs of the java processes started by the launch.sh script
 
 pids=$(pgrep -f "java Main $configPath")
@@ -20,7 +24,7 @@ do
     continue
   fi
   echo "Connecting to $node ..."
-  ssh $node 
+  ssh $netID@$node 
   childPIDs = $(pgrep -f "java Main $configPath")
   for pid in $pids
   do
