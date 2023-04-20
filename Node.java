@@ -245,34 +245,43 @@ public class Node {
 
     // communication functions
     public void startListening() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            // Initalization
-            this.transition();
-            Thread listeningThread = new Thread(() -> {
-                try {
-                    while (!this.synchGHSComplete) {
-                        Socket clientSocket = serverSocket.accept();
-                        Thread clientThread = new Thread(() -> {
-                            try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
-                                Message message;
-                                while ((message = (Message)input.readObject()) != null) {
-                                    messageQueue.add(message);
-                                    this.transition();
-                                }
-                            } catch (IOException | ClassNotFoundException  e) {
+        ServerSocket serverSocket = new ServerSocket(port);
+        this.transition();
+        Thread listeningThread = new Thread(() -> {
+            try {
+                while (!this.synchGHSComplete) {
+                    Socket clientSocket = serverSocket.accept();
+                    new Thread(() -> {
+                        try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
+                            Message message;
+                            while ((message = (Message)input.readObject()) != null) {
+                                messageQueue.add(message);
+                                this.transition();
+                            }
+                        } catch (IOException | ClassNotFoundException e) {
+                            e.printStackTrace();
+                        } finally {
+                            try {
+                                clientSocket.close();
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        });
-                        
-                        clientThread.start();
-                    }
+                        }
+                    }).start();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    serverSocket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            });
-            listeningThread.start();
-        }
+            }
+        });
+        listeningThread.start();
     }
+    
 
     public void sendMessageTCP(Message message, String host, int port) throws IOException {
         int retryInterval = 5000;
