@@ -1,7 +1,12 @@
 #!/bin/bash
 
-configPath=$1
+# Read the contents of the configuration file into a variable
+configPath = $1
+config=$(cat $configPath)
 
+# Remove comment lines and extract node hostnames
+nodes=$(echo "$config" | grep -E '^[0-9]+$' | head -n 1)
+hostnames=$(echo "$config" | grep -E '^[0-9]+\s+\w+\.\w+\.\w+\s+[0-9]+$' | cut -d ' ' -f 2)
 netID="jxp220032"
 
 # Get the PIDs of the java processes started by the launch.sh script
@@ -14,17 +19,14 @@ do
   kill $pid
 done
 
-# Parse the input file and extract the list of nodes
-nodes=($(awk '$0 !~ /^#/ && NF {print $2}' $configPath))
-
-for node in "${nodes[@]}"
+for remotehost in "${hostnames[@]}"
 do
   # Skip the host machine
-  if [[ "$node" == "$host" ]]; then
+  if [[ "$remotehost" == "$host" ]]; then
     continue
   fi
   echo "Connecting to $node ..."
-  ssh $netID@$node 
+  ssh $netID@$remotehost 
   childPIDs = $(pgrep -f "java Main $configPath")
   for pid in $pids
   do

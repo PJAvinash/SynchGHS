@@ -1,39 +1,40 @@
 #!/bin/bash
 
-configPath=$1
+# Read the contents of the configuration file into a variable
+config=$(cat $1)
 
-
+# Remove comment lines and extract node hostnames
+nodes=$(echo "$config" | grep -E '^[0-9]+$' | head -n 1)
+hostnames=$(echo "$config" | grep -E '^[0-9]+\s+\w+\.\w+\.\w+\s+[0-9]+$' | cut -d ' ' -f 2)
 netID="jxp220032"
 
 # Get the hostname of the current machine
 host=$(hostname)
 
-# Parse the input file and extract the list of nodes
-nodes=($(awk '$0 !~ /^#/ && NF {print $2}' $configPath))
-
 # Compile the Java program in the parent directory
 cd ..
 javac Main.java
 
-#create build
-for node in "${nodes[@]}"
+#connect to all nodes using ssh.
+for remotehost in "${hostnames[@]}"
 do
   # Skip the host machine
-  if [[ "$node" == "$host" ]]; then
+  if [[ "$remotehost" == "$host" ]]; then
     continue
   fi
   echo "Connecting to $node ..."
-  #ssh $netID@$node "cd /DSProject2/SynchGHS "
+  ssh $netID@$remotehost
 done
 
 # Loop through the nodes and execute a command over SSH
-for node in "${nodes[@]}"
+for remotehost in "${hostnames[@]}"
 do
   # Skip the host machine
-  if [[ "$node" == "$host" ]]; then
+  if [[ "$remotehost" == "$host" ]]; then
+    "java Main $configPath"
     continue
   fi
-  echo "Connecting to $node ..."
-  ssh -f $netID@$node "cd DSProject2/SynchGHS java Main $configPath"
+  echo "Starting main in $remotehost ..."
+  ssh -f $netID@$remotehost "cd DSProject2/SynchGHS java Main $configPath"
   sleep 1
 done
