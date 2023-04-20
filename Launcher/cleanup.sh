@@ -11,7 +11,7 @@ hostname_array=($hostnames)
 netID="jxp220032"
 
 # Get the PIDs of the java processes started by the launch.sh script
-pids=$(pgrep -f "java Main $configPath")
+pids=$(pgrep -f "java Main Launcher/$configPath")
 
 # Loop through the PIDs and terminate the corresponding processes
 for pid in $pids

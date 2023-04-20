@@ -34,10 +34,10 @@ for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then
-    java Main "$1"
+    java Main "Launcher/$1"
     continue
   fi
   echo "Starting main in $remotehost ..."
-  gnome-terminal -- bash -c "ssh -f $netID@$remotehost \"cd DSProject2/SynchGHS && java Main $1\"; exec bash"
+  gnome-terminal -- bash -c "ssh -f $netID@$remotehost \"cd DSProject2/SynchGHS && java Main Launcher/$1\"; exec bash"
   sleep 1
 done
