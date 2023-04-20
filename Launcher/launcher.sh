@@ -6,6 +6,7 @@ config=$(cat $1)
 # Remove comment lines and extract node hostnames
 nodes=$(echo "$config" | grep -E '^[0-9]+$' | head -n 1)
 hostnames=$(echo "$config" | grep -E '^[0-9]+\s+\w+\.\w+\.\w+\s+[0-9]+$' | cut -d ' ' -f 2)
+hostname_array=($hostnames)
 netID="jxp220032"
 
 # Get the hostname of the current machine
@@ -16,7 +17,7 @@ cd ..
 javac Main.java
 
 #connect to all nodes using ssh.
-for remotehost in "${hostnames[@]}"
+for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then
@@ -28,7 +29,7 @@ done
 
 echo "completed connection test"
 # Loop through the nodes and execute a command over SSH
-for remotehost in "${hostnames[@]}"
+for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then

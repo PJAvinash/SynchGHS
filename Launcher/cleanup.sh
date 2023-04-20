@@ -7,6 +7,7 @@ config=$(cat $configPath)
 # Remove comment lines and extract node hostnames
 nodes=$(echo "$config" | grep -E '^[0-9]+$' | head -n 1)
 hostnames=$(echo "$config" | grep -E '^[0-9]+\s+\w+\.\w+\.\w+\s+[0-9]+$' | cut -d ' ' -f 2)
+hostname_array=($hostnames)
 netID="jxp220032"
 
 # Get the PIDs of the java processes started by the launch.sh script
@@ -19,15 +20,15 @@ do
   kill $pid
 done
 
-for remotehost in "${hostnames[@]}"
+for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then
     continue
   fi
-  echo "Connecting to $node ..."
+  echo "Connecting to $remotehost ..."
   ssh $netID@$remotehost 
-  childPIDs = $(pgrep -f "java Main $configPath")
+  childPIDs=$(pgrep -f "java Main $configPath")
   for pid in $pids
   do
     echo "Terminating process $pid ..."
