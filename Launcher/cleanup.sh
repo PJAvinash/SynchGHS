@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Read the contents of the configuration file into a variable
-configPath = $1
+configPath=$1
 config=$(cat $configPath)
 
 # Remove comment lines and extract node hostnames

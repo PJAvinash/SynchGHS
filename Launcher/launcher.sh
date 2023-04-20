@@ -22,10 +22,11 @@ do
   if [[ "$remotehost" == "$host" ]]; then
     continue
   fi
-  echo "Connecting to $node ..."
+  echo "Connecting to $remotehost ..."
   ssh $netID@$remotehost
 done
 
+echo "completed connection test"
 # Loop through the nodes and execute a command over SSH
 for remotehost in "${hostnames[@]}"
 do
