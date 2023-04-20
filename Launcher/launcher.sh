@@ -23,7 +23,7 @@ do
     continue
   fi
   echo "Connecting to $node ..."
-  ssh $netID@$node "cd .. && javac Main.java "
+  #ssh $netID@$node "cd /DSProject2/SynchGHS "
 done
 
 # Loop through the nodes and execute a command over SSH
@@ -34,6 +34,6 @@ do
     continue
   fi
   echo "Connecting to $node ..."
-  ssh -f $netID@$node "java Main $configPath"
+  ssh -f $netID@$node "cd DSProject2/SynchGHS java Main $configPath"
   sleep 1
 done
