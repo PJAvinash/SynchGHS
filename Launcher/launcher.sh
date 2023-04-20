@@ -2,7 +2,8 @@
 
 configPath=$1
 
-netID = "jxp220032"
+
+netID="jxp220032"
 
 # Get the hostname of the current machine
 host=$(hostname)

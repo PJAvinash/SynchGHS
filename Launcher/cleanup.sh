@@ -2,7 +2,7 @@
 
 configPath=$1
 
-netID = "jxp220032"
+netID="jxp220032"
 
 # Get the PIDs of the java processes started by the launch.sh script
 
