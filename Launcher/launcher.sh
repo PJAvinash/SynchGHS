@@ -24,7 +24,7 @@ do
     continue
   fi
   echo "Connecting to $remotehost ..."
-  "ssh -f $netID@$remotehost; exec bash"
+  ssh -f $netID@$remotehost
 done
 
 echo "completed connection test"
@@ -34,10 +34,10 @@ for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then
-    java Main "Launcher/$1"
+    java Main "Launcher/$config"
     continue
   fi
   echo "Starting main in $remotehost ..."
-  "ssh -f $netID@$remotehost \"cd DSProject2/SynchGHS && java Main Launcher/$1\"; exec bash"
+  ssh -f $netID@$remotehost cd DSProject2/SynchGHS && java Main Launcher/$config
   sleep 1
 done
