@@ -18,7 +18,7 @@ public class Main {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.trim().startsWith("#") || line.isBlank()) {
+                if (line.trim().startsWith("#") || line.trim().isEmpty()) {
                     // Ignore comments and blank lines
                     continue;
                 } else if (line.trim().matches("[0-9]+")) {
