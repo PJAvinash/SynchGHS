@@ -24,7 +24,7 @@ do
     continue
   fi
   echo "Connecting to $remotehost ..."
-  ssh -f $netID@$remotehost
+  ssh -f $netID@$remotehost "echo 'Connection test successful'; exec bash"
 done
 
 echo "completed connection test"
@@ -38,6 +38,6 @@ do
     continue
   fi
   echo "Starting main in $remotehost ..."
-  ssh -f $netID@$remotehost cd DSProject2/SynchGHS && java Main Launcher/$config
+  ssh -f $netID@$remotehost "cd DSProject2/SynchGHS && java Main Launcher/$config"
   sleep 1
 done
