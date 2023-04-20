@@ -11,8 +11,8 @@ hostname_array=($hostnames)
 netID="jxp220032"
 
 # Get the PIDs of the java processes started by the launch.sh script
-
 pids=$(pgrep -f "java Main $configPath")
+
 # Loop through the PIDs and terminate the corresponding processes
 for pid in $pids
 do
@@ -27,12 +27,5 @@ do
     continue
   fi
   echo "Connecting to $remotehost ..."
-  ssh $netID@$remotehost 
-  childPIDs=$(pgrep -f "java Main $configPath")
-  for pid in $pids
-  do
-    echo "Terminating process $pid ..."
-    kill $pid
-  done
-  exit
+  ssh $netID@$remotehost "pids=\$(pgrep -f \"java Main $configPath\"); for pid in \$pids; do echo \"Terminating process \$pid ...\"; kill \$pid; done; exit"
 done

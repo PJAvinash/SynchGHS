@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Read the contents of the configuration file into a variable
-config=$(cat $1)
+config=$(cat "$1")
 
 # Remove comment lines and extract node hostnames
 nodes=$(echo "$config" | grep -E '^[0-9]+$' | head -n 1)
@@ -34,10 +34,10 @@ for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then
-    "java Main $configPath"
+    java Main "$1"
     continue
   fi
   echo "Starting main in $remotehost ..."
-  gnome-terminal -- bash -c "ssh -f $netID@$remotehost cd DSProject2/SynchGHS java Main $configPath; exec bash"
+  gnome-terminal -- bash -c "ssh -f $netID@$remotehost \"cd DSProject2/SynchGHS && java Main $1\"; exec bash"
   sleep 1
 done
