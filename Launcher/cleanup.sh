@@ -33,5 +33,6 @@ do
   do
     echo "Terminating process $pid ..."
     kill $pid
-    done
+  done
+  exit
 done

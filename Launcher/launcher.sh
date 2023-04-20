@@ -24,10 +24,11 @@ do
     continue
   fi
   echo "Connecting to $remotehost ..."
-  ssh $netID@$remotehost
+  gnome-terminal --command "ssh -f $netID@$remotehost"
 done
 
 echo "completed connection test"
+
 # Loop through the nodes and execute a command over SSH
 for remotehost in "${hostname_array[@]}"
 do
@@ -37,6 +38,6 @@ do
     continue
   fi
   echo "Starting main in $remotehost ..."
-  ssh -f $netID@$remotehost "cd DSProject2/SynchGHS java Main $configPath"
+  gnome-terminal --command "ssh -f $netID@$remotehost "cd DSProject2/SynchGHS java Main $configPath""
   sleep 1
 done
