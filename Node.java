@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class Node {
     boolean synchGHSComplete = false;
     private Object lock = new Object();
-    private boolean logging =false;
+    private boolean logging =true;
     private boolean testingMode = false;
     int uid;
     String hostName;

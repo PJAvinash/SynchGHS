@@ -55,7 +55,6 @@ public class Main {
         int uid = uidList.get(index);
         int port = portnumbers.get(index);
         Node processingNode = new Node(uid,hostname,port);
-        System.out.println(" uid: "+uid+" host: "+hostname+" port:"+port);
         for(int i = 0; i< edges.size(); i++){
             if(edges.get(i).getSource() == uid || edges.get(i).getDestination() ==uid){
                 int otherendUID = edges.get(i).getOtherEnd(uid);
