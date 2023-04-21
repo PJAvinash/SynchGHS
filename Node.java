@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class Node {
     boolean synchGHSComplete = false;
     private Object lock = new Object();
-    private boolean logging =true;
+    private boolean logging =false;
     private boolean testingMode = false;
     int uid;
     String hostName;
@@ -97,7 +97,6 @@ public class Node {
                             this.messageQueue.removeAll(searchMessages);
                         }
                     }
-                    //this.printAdjacent();
                     break;
                 case SEARCH_MWOE:
                     List<Message> convergeCastMessages = this.getConvergeCastMessages();
@@ -161,7 +160,6 @@ public class Node {
                         }
                         this.messageQueue.removeAll(convergeCastMessages);
                     }
-                    //this.printAdjacent();
                     break;
                 case WAIT_FOR_MWOE_BROADCAST:
                     if (!this.isLeader()) {
@@ -178,7 +176,6 @@ public class Node {
                             this.messageQueue.removeAll(mwoeBroadcast);
                         }
                     }
-                    //this.printAdjacent();
                     break;
                 case WAIT_FOR_COMPONENT_MERGE:
                     Edge mwoe = this.getMWOE();
@@ -196,11 +193,7 @@ public class Node {
                         this.updateEdgeType(Arrays.asList(mwoe_otherend),IncidentEdgeType.BRANCH);
                         this.messageQueue.removeAll(componentMergeMessages);
                         this.transition();
-                        // if(this.isLeader()){
-                        //     this.transition();
-                        // }
                     }
-                    //this.printAdjacent();
                     break;
 
 
@@ -297,44 +290,7 @@ public class Node {
 
 
 
-    // communication functions
-    // public void startListening() throws IOException {
-    //     ServerSocket serverSocket = new ServerSocket(port);
-    //     this.transition();
-    //     Thread listeningThread = new Thread(() -> {
-    //         try {
-    //             while (!this.synchGHSComplete) {
-    //                 Socket clientSocket = serverSocket.accept();
-    //                 new Thread(() -> {
-    //                     try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
-    //                         Message message;
-    //                         while ((message = (Message)input.readObject()) != null) {
-    //                             this.addMessage(message);
-    //                             this.transition();
-    //                         }
-    //                     } catch (IOException | ClassNotFoundException e) {
-    //                         e.printStackTrace();
-    //                     } finally {
-    //                         try {
-    //                             clientSocket.close();
-    //                         } catch (IOException e) {
-    //                             e.printStackTrace();
-    //                         }
-    //                     }
-    //                 }).start();
-    //             }
-    //         } catch (IOException e) {
-    //             e.printStackTrace();
-    //         } finally {
-    //             try {
-    //                 serverSocket.close();
-    //             } catch (IOException e) {
-    //                 e.printStackTrace();
-    //             }
-    //         }
-    //     });
-    //     listeningThread.start();
-    // }
+    
     
     public void startListening() throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
@@ -396,35 +352,6 @@ public class Node {
         }
     }
 
-    // public void sendMessageTCP(Message message, String host, int port) throws IOException {
-    //     int retryInterval = 5000;
-    //     int maxRetries = 5;
-    //     int retries = 0;
-    //     while (retries <= maxRetries) {
-    //         try (Socket socket = new Socket()) {
-    //             socket.connect(new InetSocketAddress(host, port), retryInterval);
-    //             try (ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
-    //                 output.writeObject(message);
-    //                 output.flush();
-    //             }
-    //             return;
-    //         } catch (IOException e) {
-    //             retries++;
-    //             if (retries > maxRetries) {
-    //                 throw e; // throw the exception if max retries have been reached
-    //             }
-    //             // log or report the error and retry attempts here
-    //             try {
-    //                 Thread.sleep(retryInterval);
-    //             } catch (InterruptedException ex) {
-    //                 ex.printStackTrace();
-    //             }
-    //         }
-    //     }
-    // }
-    
-    
-    
     private void sendMessage(Message inputMessage,int targetUID){
         //logic to send message
         this.adjacentNodes.stream().filter(t-> t.uid == targetUID).forEach(t -> {

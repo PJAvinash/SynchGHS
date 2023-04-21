@@ -25,7 +25,7 @@ do
     continue
   fi
   echo "Connecting to $remotehost ..."
-  ssh -f $netID@$remotehost "echo 'Connection test successful'; exec bash"
+  ssh -f c$remotehost "echo 'Connection test successful'; exec bash"
 done
 
 echo "completed connection test"
