@@ -332,6 +332,31 @@ public class Node {
     }
     
 
+    // public void sendMessageTCP(Message message, String host, int port) throws IOException {
+    //     int retryInterval = 5000;
+    //     int maxRetries = 5;
+    //     int retries = 0;
+    //     while (retries <= maxRetries) {
+    //         try (Socket socket = new Socket()) {
+    //             socket.connect(new InetSocketAddress(host, port), retryInterval);
+    //             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+    //             output.writeObject(message);
+    //             output.flush();
+    //             return;
+    //         } catch (IOException e) {
+    //             retries++;
+    //             if (retries > maxRetries) {
+    //                 throw e; // throw the exception if max retries have been reached
+    //             }
+    //             try {
+    //                 Thread.sleep(retryInterval);
+    //             } catch (InterruptedException ex) {
+    //                 ex.printStackTrace();
+    //             }
+    //         }
+    //     }
+    // }
+
     public void sendMessageTCP(Message message, String host, int port) throws IOException {
         int retryInterval = 5000;
         int maxRetries = 5;
@@ -339,15 +364,17 @@ public class Node {
         while (retries <= maxRetries) {
             try (Socket socket = new Socket()) {
                 socket.connect(new InetSocketAddress(host, port), retryInterval);
-                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                output.writeObject(message);
-                output.flush();
+                try (ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
+                    output.writeObject(message);
+                    output.flush();
+                }
                 return;
             } catch (IOException e) {
                 retries++;
                 if (retries > maxRetries) {
                     throw e; // throw the exception if max retries have been reached
                 }
+                // log or report the error and retry attempts here
                 try {
                     Thread.sleep(retryInterval);
                 } catch (InterruptedException ex) {
@@ -356,6 +383,7 @@ public class Node {
             }
         }
     }
+    
     
     
     private void sendMessage(Message inputMessage,int targetUID){
