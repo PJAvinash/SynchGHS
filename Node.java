@@ -120,6 +120,7 @@ public class Node {
                                 Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
                                 this.sendMessage(NoMWOE, this.parent);
                             }
+                            
                             break;
                         }
                         Edge minEdge = null;
