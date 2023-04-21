@@ -28,6 +28,7 @@ for line in lines:
         port = int(match.group(2))
         hosts[hostname] = port
 
+subprocess.run(['cd..', 'javac Main.java'], stdout=subprocess.PIPE)
 # Loop through each host and SSH into it to execute command
 remotehosts = list(hosts.keys())
 for host in remotehosts:
