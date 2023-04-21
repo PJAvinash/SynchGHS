@@ -10,13 +10,13 @@
 #
 # Format is:
 # UID Hostname Port
-5 dc01.utdallas.edu 5000
-200 dc03.utdallas.edu 5000
-8 dc04.utdallas.edu 5000
-184 dc05.utdallas.edu 5000
-9 dc02.utdallas.edu 5000
-37 dc07.utdallas.edu 5000
-78 dc08.utdallas.edu 5000
+5 dc01.utdallas.edu 5001
+200 dc03.utdallas.edu 5001
+8 dc04.utdallas.edu 5001
+184 dc05.utdallas.edu 5001
+9 dc02.utdallas.edu 5001
+37 dc07.utdallas.edu 5001
+78 dc08.utdallas.edu 5001
 # List of edges and their weight, one per line. An edge is denoted
 # by (smaller uid, larger uid)
 (5,200) 5
