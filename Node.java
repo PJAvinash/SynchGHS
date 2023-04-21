@@ -87,10 +87,10 @@ public class Node {
                         //Non-leader
                         List<Integer> branchUIDs = this.adjacentNodes.stream().filter(t->t.edgeType ==IncidentEdgeType.BRANCH).map(t->t.uid).collect(Collectors.toList());
                         List<Message> searchMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.SEARCH && branchUIDs.contains(msg.from)).collect(Collectors.toList());
-                        this.parent = searchMessages.get(0).from;
-                        this.coreMIN = searchMessages.get(0).coreMIN;
-                        this.level = searchMessages.get(0).coreLevel;
                         if(searchMessages.size() > 0 ){
+                            this.parent = searchMessages.get(0).from;
+                            this.coreMIN = searchMessages.get(0).coreMIN;
+                            this.level = searchMessages.get(0).coreLevel;
                             this.state = NodeState.SEARCH_MWOE;
                             this.sendTestMessage();
                             this.sendSearchMessage();
