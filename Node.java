@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class Node {
     private boolean synchGHSComplete = false;
     private Object lock = new Object();
-    private boolean logging =false;
+    private boolean logging =true;
     private boolean testingMode = false;
     private int uid;
     private String hostName;
@@ -112,30 +112,25 @@ public class Node {
                         //Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
                         //check if all the responses from
                         this.consolelog("BASIC: " + this.getBasicEdges().size() + " NO_MWOE: " + convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).count());
-                        if(this.getBasicEdges().size() == 0 && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() == 0){
+                        if(this.getBasicEdges().size() == 0 && this.getActiveBranchEdges().size() == 0){
                             //Algorithm terminated. for this node. print tree and send response to parent.
                             this.printAdjacent();
                             if(!this.isLeader()){
                                 Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
                                 this.sendMessage(NoMWOE, this.parent);
-                            }else{
-                                this.setAlgorithmComplete();
-                                System.out.println("SynchGHS MST contruction  completed.");
-                                return;  
                             }
-
                             break;
                         }
                         Edge minEdge = null;
-                        if(this.getBasicEdges().size() == 0  && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() != 0){
+                        if(this.getBasicEdges().size() == 0  && this.getActiveBranchEdges().size() != 0){
                             // find the minimum edge and forward it to parent.
                             minEdge = Node.getCandidateMWOE(convergeCastMessages);
                         }
-                        if(this.getBasicEdges().size() != 0  && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() == 0){
+                        if(this.getBasicEdges().size() != 0  && this.getActiveBranchEdges().size() == 0){
                             // find the min edge and forward it to parent.
                             minEdge = this.getMWOE();
                         }
-                        if(this.getBasicEdges().size() != 0  && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() != 0){
+                        if(this.getBasicEdges().size() != 0  && this.getActiveBranchEdges().size() != 0){
                             // find the min edge and forward it to parent.
                             minEdge = Edge.min(Node.getCandidateMWOE(convergeCastMessages), this.getMWOE());
                             
@@ -266,6 +261,9 @@ public class Node {
 
     private List<Edge> getBasicEdges(){
         return this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).map(t -> new Edge(t.edgeWeight,t.uid,this.uid)).collect(Collectors.toList());
+    }
+    private List<Edge> getActiveBranchEdges(){
+        return this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BRANCH).map(t -> new Edge(t.edgeWeight,t.uid,this.uid)).collect(Collectors.toList());
     }
     
 
