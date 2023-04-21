@@ -18,23 +18,23 @@ import java.util.stream.Collectors;
 
 
 public class Node {
-    boolean synchGHSComplete = false;
+    private boolean synchGHSComplete = false;
     private Object lock = new Object();
     private boolean logging =true;
     private boolean testingMode = false;
-    int uid;
-    String hostName;
-    int port;
-    int level;
-    int coreMIN;
-    int parent;
+    private int uid;
+    private String hostName;
+    private int port;
+    private int level;
+    private int coreMIN;
+    private int parent;
     private NodeState state;
     //bookkeeping variables
     private Set<Integer> convergeCastWait = new HashSet<>();
     private Set<Integer> testResponseWait = new HashSet<>();
 
-    ArrayList<AdjTuple> adjacentNodes = new ArrayList<AdjTuple>();
-    List<Message> messageQueue = Collections.synchronizedList(new ArrayList<Message>());
+    private ArrayList<AdjTuple> adjacentNodes = new ArrayList<AdjTuple>();
+    private List<Message> messageQueue = Collections.synchronizedList(new ArrayList<Message>());
 
     public Node(int uid,String hostName,int port){
         this.uid = uid;
@@ -249,9 +249,9 @@ public class Node {
         this.messageQueue.removeAll(absorbRequests);
     }
     private void updateEdgeType(List<Integer> uids, IncidentEdgeType edgeType) {
-        for (AdjTuple tuple : this.adjacentNodes) {
-            if (uids.contains(tuple.uid)) {
-                tuple.edgeType = edgeType;
+        for (AdjTuple t : this.adjacentNodes) {
+            if (uids.contains(t.uid) && (( t.edgeType == IncidentEdgeType.BASIC && (edgeType == IncidentEdgeType.REJECTED || edgeType == IncidentEdgeType.BRANCH))||(t.edgeType == IncidentEdgeType.BRANCH && edgeType == IncidentEdgeType.NOMWOE)) ){
+                t.edgeType = edgeType;
             }
         }
     }
@@ -388,6 +388,10 @@ public class Node {
     public NodeState getState(){
         NodeState r = this.state;
         return r;
+    }
+    public int getCoreID(){
+        int cid = this.coreMIN;
+        return cid;
     }
 }
 

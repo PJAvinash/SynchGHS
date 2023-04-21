@@ -84,10 +84,10 @@ public class Testing {
         for(int i = 0; i<inputMessages.size(); i++){
             testNode.addMessage(inputMessages.get(i));
             testNode.transition();
-            if(expStates.get(i) == testNode.getState() && coreID.get(i) == testNode.coreMIN){
+            if(expStates.get(i) == testNode.getState() && coreID.get(i) == testNode.getCoreID()){
                 System.out.println(i+" - PASS");
             }else{
-                System.out.println(i+" - #FAIL STATE:"+testNode.getState()+" expSTATE: "+expStates.get(i)+" CORE:"+testNode.coreMIN+" expCORE:"+coreID.get(i));
+                System.out.println(i+" - #FAIL STATE:"+testNode.getState()+" expSTATE: "+expStates.get(i)+" CORE:"+testNode.getCoreID()+" expCORE:"+coreID.get(i));
             }
         }
     }

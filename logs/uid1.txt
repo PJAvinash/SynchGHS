@@ -1,16 +1,48 @@
-uid:2 state:INITIAL coreID:2 : message  to--->:1 content: {"from":2,"coreMIN":2,"coreLevel":0,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":1,"S":1,"D":2}}
-uid:3 state:INITIAL coreID:3 : message  to--->:1 content: {"from":3,"coreMIN":3,"coreLevel":0,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":2,"S":1,"D":3}}
-uid:3 state:INITIAL coreID:1 : message  to--->:1 content: {"from":3,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_REJECT"}
-uid:2 state:SEARCH_MWOE coreID:1 : message  to--->:1 content: {"from":2,"coreMIN":1,"coreLevel":1,"messageType":"NO_MWOE"}
-uid:6 state:INITIAL coreID:4 : message  to--->:1 content: {"from":6,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
-uid:4 state:INITIAL coreID:4 : message  to--->:1 content: {"from":4,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
-uid:4 state:SEARCH_MWOE coreID:4 : message  to--->:1 content: {"from":4,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_TEST"}
-uid:5 state:INITIAL coreID:4 : message  to--->:1 content: {"from":5,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
-uid:5 state:SEARCH_MWOE coreID:4 : message  to--->:1 content: {"from":5,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_TEST"}
-uid:6 state:SEARCH_MWOE coreID:4 : message  to--->:1 content: {"from":6,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_TEST"}
-uid:4 state:SEARCH_MWOE coreID:4 : message  to--->:1 content: {"from":4,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":5,"S":1,"D":4}}
-uid:5 state:SEARCH_MWOE coreID:1 : message  to--->:1 content: {"from":5,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_TEST"}
-uid:6 state:SEARCH_MWOE coreID:1 : message  to--->:1 content: {"from":6,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_TEST"}
-uid:6 state:SEARCH_MWOE coreID:1 : message  to--->:1 content: {"from":6,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_REJECT"}
-uid:5 state:SEARCH_MWOE coreID:1 : message  to--->:1 content: {"from":5,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_REJECT"}uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:5 content: {"from":5,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_REJECT"}    (4 : dc04.utdallas.edu)    
-uid:4 state:SEARCH_MWOE coreID:1 : message  to--->:1 content: {"from":4,"coreMIN":1,"coreLevel":2,"messageType":"NO_MWOE"}
+uid:1 state:INITIAL coreID:1 :  absorbedUIDs: []
+uid:1 state:INITIAL coreID:1 : message  to--->:2 content: {"from":1,"coreMIN":1,"coreLevel":0,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":1,"S":1,"D":2}}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  <--from:3 content: {"from":3,"coreMIN":3,"coreLevel":0,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":2,"S":1,"D":3}}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 :  absorbedUIDs: []
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  <--from:2 content: {"from":2,"coreMIN":2,"coreLevel":0,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":1,"S":1,"D":2}}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 :  absorbedUIDs: []
+uid:1 state:INITIAL coreID:1 : message  to--->:3 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":2,"S":1,"D":3}}
+uid:1 state:INITIAL coreID:1 :  absorbedUIDs: [3]
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:4 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_TEST"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:5 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_TEST"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:6 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_TEST"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:2 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"SEARCH"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:3 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"SEARCH"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:2 content: {"from":2,"coreMIN":1,"coreLevel":1,"messageType":"NO_MWOE"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:3 content: {"from":3,"coreMIN":1,"coreLevel":1,"messageType":"NO_MWOE"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : BASIC: 3 NO_MWOE: 2
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:6 content: {"from":6,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : BASIC: 3 NO_MWOE: 2
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:4 content: {"from":4,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : BASIC: 3 NO_MWOE: 2
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:4 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":5,"S":1,"D":4}}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  <--from:4 content: {"from":4,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_TEST"}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  to--->:4 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 :  absorbedUIDs: []
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  <--from:6 content: {"from":6,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_TEST"}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  to--->:6 content: {"from":1,"coreMIN":1,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 :  absorbedUIDs: []
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  <--from:5 content: {"from":5,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_ACCEPT"}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 :  absorbedUIDs: []
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 : message  <--from:4 content: {"from":4,"coreMIN":4,"coreLevel":1,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":5,"S":1,"D":4}}
+uid:1 state:WAIT_FOR_COMPONENT_MERGE coreID:1 :  absorbedUIDs: []
+uid:1 state:INITIAL coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:5 content: {"from":1,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_TEST"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:6 content: {"from":1,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_TEST"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:4 content: {"from":1,"coreMIN":1,"coreLevel":2,"messageType":"SEARCH"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:6 content: {"from":6,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_TEST"}
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:6 content: {"from":1,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_REJECT"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:6 content: {"from":6,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_REJECT"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : message  <--from:4 content: {"from":4,"coreMIN":1,"coreLevel":2,"messageType":"NO_MWOE"}
+uid:1 state:SEARCH_MWOE coreID:1 :  absorbedUIDs: []
+uid:1 state:SEARCH_MWOE coreID:1 : BASIC: 1 NO_MWOE: 1
+uid:1 state:SEARCH_MWOE coreID:1 : message  to--->:5 content: {"from":1,"coreMIN":1,"coreLevel":2,"messageType":"COMPONENT_MERGE","candidateMWOE":{"W":6,"S":1,"D":5}}
