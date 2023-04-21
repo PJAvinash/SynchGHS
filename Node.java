@@ -120,7 +120,7 @@ public class Node {
                                 Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
                                 this.sendMessage(NoMWOE, this.parent);
                             }
-                            
+
                             break;
                         }
                         Edge minEdge = null;
@@ -195,9 +195,10 @@ public class Node {
                         this.state = NodeState.INITIAL;
                         this.updateEdgeType(Arrays.asList(mwoe_otherend),IncidentEdgeType.BRANCH);
                         this.messageQueue.removeAll(componentMergeMessages);
-                        if(this.isLeader()){
-                            this.transition();
-                        }
+                        this.transition();
+                        // if(this.isLeader()){
+                        //     this.transition();
+                        // }
                     }
                     //this.printAdjacent();
                     break;
