@@ -245,7 +245,7 @@ public class Node {
         absorbRequests.stream().forEach(t -> this.sendMessage(new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_MERGE,t.candidateMWOE),t.from));
         List<Integer> absorbedUIDs = absorbRequests.stream().map(t -> t.from).collect(Collectors.toList());
         this.updateEdgeType(absorbedUIDs,IncidentEdgeType.BRANCH);
-        this.consolelog("absorbedUIDs:" + absorbedUIDs.toString());
+        this.consolelog(" absorbedUIDs: " + absorbedUIDs.toString());
         this.messageQueue.removeAll(absorbRequests);
     }
     private void updateEdgeType(List<Integer> uids, IncidentEdgeType edgeType) {
