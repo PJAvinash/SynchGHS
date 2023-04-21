@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class Node {
     private boolean synchGHSComplete = false;
     private Object lock = new Object();
-    private boolean logging =true;
+    private boolean logging =false;
     private boolean testingMode = false;
     private int uid;
     private String hostName;
@@ -118,6 +118,10 @@ public class Node {
                             if(!this.isLeader()){
                                 Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
                                 this.sendMessage(NoMWOE, this.parent);
+                            }else{
+                                this.setAlgorithmComplete();
+                                System.out.println("SynchGHS MST contruction  completed.");
+                                return;  
                             }
 
                             break;
