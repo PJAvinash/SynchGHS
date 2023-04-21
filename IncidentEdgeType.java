@@ -1,5 +1,6 @@
 public enum IncidentEdgeType {
     BASIC,
     REJECTED,
-    BRANCH
+    BRANCH,
+    NOMWOE
 }

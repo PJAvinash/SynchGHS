@@ -22,4 +22,21 @@ public class Message implements Serializable{
         this.candidateMWOE = null;
 
     }
+    @Override
+    public String toString() {
+        String json = "{";
+        json += "\"from\":" + from + ",";
+        json += "\"coreMIN\":" + coreMIN + ",";
+        json += "\"coreLevel\":" + coreLevel + ",";
+        json += "\"messageType\":\"" + messageType.toString() + "\"";
+
+        if (candidateMWOE != null) {
+            json += ",";
+            json += "\"candidateMWOE\":" + candidateMWOE.toString();
+        }
+
+        json += "}";
+
+        return json;
+    }
 }

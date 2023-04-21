@@ -40,5 +40,21 @@ public class Edge implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"W\":");
+        sb.append(this.weight);
+        sb.append(",");
+        sb.append("\"S\":");
+        sb.append(this.source);
+        sb.append(",");
+        sb.append("\"D\":");
+        sb.append(this.destination);
+        sb.append("}");
+        return sb.toString();
+    }
+
 
 }

@@ -5,5 +5,6 @@ public enum MessageType{
     COMPONENT_ACCEPT,
     COMPONENT_REJECT,
     MWOE_BROADCAST,
-    COMPONENT_MERGE
+    COMPONENT_MERGE,
+    NO_MWOE
 }

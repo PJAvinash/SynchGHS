@@ -5,23 +5,31 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 public class Node {
     boolean synchGHSComplete = false;
     private Object lock = new Object();
+    private boolean logging =true;
+    private boolean testingMode = false;
     int uid;
     String hostName;
     int port;
     int level;
     int coreMIN;
-    int leader;
     int parent;
-    NodeState state;
+    private NodeState state;
+    //bookkeeping variables
+    private Set<Integer> convergeCastWait = new HashSet<>();
+    private Set<Integer> testResponseWait = new HashSet<>();
+
     ArrayList<AdjTuple> adjacentNodes = new ArrayList<AdjTuple>();
     List<Message> messageQueue = Collections.synchronizedList(new ArrayList<Message>());
 
@@ -68,9 +76,9 @@ public class Node {
                             this.state = NodeState.WAIT_FOR_COMPONENT_MERGE;
                         }
                         else{
+                            this.state = NodeState.SEARCH_MWOE;
                             this.sendTestMessage();
                             this.sendSearchMessage();
-                            this.state = NodeState.SEARCH_MWOE;
                         }
                     }else{
                         //Non-leader
@@ -80,69 +88,93 @@ public class Node {
                         this.coreMIN = searchMessages.get(0).coreMIN;
                         this.level = searchMessages.get(0).coreLevel;
                         if(searchMessages.size() > 0 ){
+                            this.state = NodeState.SEARCH_MWOE;
                             this.sendTestMessage();
                             this.sendSearchMessage();
-                            this.state = NodeState.SEARCH_MWOE;
                             this.messageQueue.removeAll(searchMessages);
                         }
                     }
-                    this.printAdjacent();
+                    //this.printAdjacent();
                     break;
                 case SEARCH_MWOE:
                     List<Message> convergeCastMessages = this.getConvergeCastMessages();
                     List<Integer> componentRejectResponseUIDS = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_REJECT).map(t -> t.from).collect(Collectors.toList());
                     Set<Integer> componentAcceptResponeUIDS = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_ACCEPT).map(t -> t.from).collect(Collectors.toSet());
-                    this.adjacentNodes.forEach(t-> t.edgeType = (componentRejectResponseUIDS.contains(t.uid)) ? IncidentEdgeType.REJECTED : t.edgeType);
-                    // list of messages from nodes not in componentNodes, 
-                    Edge convergeCastMWOE = Node.getCandidateMWOE(convergeCastMessages);
-                    // If any of Outgoing edge with lesser <weight,s,d> has not confirmed the test, break and wait for more messages to change state
-                    List<Integer> candidateNeighbours = this.getOutgoingEdges().stream().filter(t -> Edge.min(convergeCastMWOE,t).equals(t)).map(t -> t.getOtherEnd(this.uid)).filter(t -> !componentRejectResponseUIDS.contains(t)).collect(Collectors.toList());
-                    candidateNeighbours.removeAll(componentAcceptResponeUIDS);
-                    if(candidateNeighbours.size()  > 0){
-                        break;
-                    }
-                    this.messageQueue.removeAll(this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_ACCEPT).collect(Collectors.toList()));
-                    if(this.isLeader()){
-                        if(convergeCastMessages.size() == this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH).count()){
-                            Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
-                            Message broadcastMWOE = new Message(this.uid, minEdge.getSource(),this.level,MessageType.MWOE_BROADCAST,minEdge);
-                            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH).forEach(t -> this.sendMessage(broadcastMWOE,t.uid));
-                            if(this.isPartOfMWOE(minEdge)){
+                    this.updateEdgeType(componentRejectResponseUIDS, IncidentEdgeType.REJECTED);
+                    this.updateEdgeType(convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).map(t->t.from).collect(Collectors.toList()),IncidentEdgeType.NOMWOE);
+                    
+                    this.testResponseWait.removeAll(componentRejectResponseUIDS);
+                    this.testResponseWait.removeAll(componentAcceptResponeUIDS);
+                    this.messageQueue.removeAll(this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_REJECT || t.messageType == MessageType.COMPONENT_ACCEPT).collect(Collectors.toList()));
+                    if(convergeCastMessages.size() == this.convergeCastWait.size()){
+                        //Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
+                        //check if all the responses from
+                        this.consolelog("BASIC: " + this.getBasicEdges().size() + " NO_MWOE: " + convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).count());
+                        if(this.getBasicEdges().size() == 0 && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() == 0){
+                            //Algorithm terminated. for this node. print tree and send response to parent.
+                            this.printAdjacent();
+                            if(!this.isLeader()){
+                                Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
+                                this.sendMessage(NoMWOE, this.parent);
+                            }
+                            break;
+                        }
+                        Edge minEdge = null;
+                        if(this.getBasicEdges().size() == 0  && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() != 0){
+                            // find the minimum edge and forward it to parent.
+                            minEdge = Node.getCandidateMWOE(convergeCastMessages);
+                        }
+                        if(this.getBasicEdges().size() != 0  && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() == 0){
+                            // find the min edge and forward it to parent.
+                            minEdge = this.getMWOE();
+                        }
+                        if(this.getBasicEdges().size() != 0  && convergeCastMessages.stream().filter(t -> t.messageType != MessageType.NO_MWOE).count() != 0){
+                            // find the min edge and forward it to parent.
+                            minEdge = Edge.min(Node.getCandidateMWOE(convergeCastMessages), this.getMWOE());
+                            
+                        }
+                        int otherEnd = minEdge.getOtherEnd(this.uid);
+                        if(this.testResponseWait.contains(otherEnd)){
+                            break;
+                        }
+                        //
+                        if(this.isLeader()){
+                            Message broadcastMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.MWOE_BROADCAST, minEdge);
+                            this.sendBroadcastMessage(broadcastMWOE);
+                            if (this.isPartOfMWOE(minEdge)) {
                                 this.sendComponentMerge(minEdge);
                                 this.state = NodeState.WAIT_FOR_COMPONENT_MERGE;
-                            }else{
+                            } else {
                                 this.state = NodeState.INITIAL;
                             }
-                            this.messageQueue.removeAll(convergeCastMessages);  
-                        }
-                    }else{
-                        if((convergeCastMessages.size()+1) == this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH).count()){
-                            Edge minEdge =  Edge.min(Node.getCandidateMWOE(convergeCastMessages), this.getMWOE());
-                            Message broadcastMWOE = new Message(this.uid, this.coreMIN,this.level,MessageType.MWOE_CONVERGECAST,minEdge);
-                            this.sendMessage(broadcastMWOE,this.parent);
-                            //update state
+                        }else{
+                            Message responseToParent = new Message(this.uid, this.coreMIN, this.level,
+                                    MessageType.MWOE_CONVERGECAST, minEdge);
+                            this.sendMessage(responseToParent, this.parent);
+                            // update state
                             this.state = NodeState.WAIT_FOR_MWOE_BROADCAST;
-                            this.messageQueue.removeAll(convergeCastMessages);
+                            
                         }
+                        this.messageQueue.removeAll(convergeCastMessages);
                     }
-                    this.printAdjacent();
+                    //this.printAdjacent();
                     break;
                 case WAIT_FOR_MWOE_BROADCAST:
                     if (!this.isLeader()) {
                         List<Message> mwoeBroadcast = this.messageQueue.stream().filter(t -> t.from == this.parent && t.messageType == MessageType.MWOE_BROADCAST).collect(Collectors.toList());
                         if (mwoeBroadcast.size() > 0) {
-                            Message mwoeBroadcastMessage = new Message(this.uid, mwoeBroadcast.get(0).coreMIN,this.level, MessageType.MWOE_BROADCAST, mwoeBroadcast.get(0).candidateMWOE);
+                            Message mwoeBroadcastMessage = new Message(this.uid, this.coreMIN,this.level, MessageType.MWOE_BROADCAST, mwoeBroadcast.get(0).candidateMWOE);
                             this.sendBroadcastMessage(mwoeBroadcastMessage);
                             if(this.isPartOfMWOE(mwoeBroadcast.get(0).candidateMWOE)){
-                                this.state  = NodeState.WAIT_FOR_COMPONENT_MERGE;
                                 this.sendComponentMerge(mwoeBroadcast.get(0).candidateMWOE);
+                                this.state  = NodeState.WAIT_FOR_COMPONENT_MERGE;
                             }else{
                                 this.state  = NodeState.INITIAL;
                             }
                             this.messageQueue.removeAll(mwoeBroadcast);
                         }
                     }
-                    this.printAdjacent();
+                    //this.printAdjacent();
                     break;
                 case WAIT_FOR_COMPONENT_MERGE:
                     Edge mwoe = this.getMWOE();
@@ -157,9 +189,13 @@ public class Node {
                         this.level = newLevel;
                         this.coreMIN = isMerge ? mwoe.getSource():componentMergeMessages.get(0).coreMIN;
                         this.state = NodeState.INITIAL;
+                        this.updateEdgeType(Arrays.asList(mwoe_otherend),IncidentEdgeType.BRANCH);
                         this.messageQueue.removeAll(componentMergeMessages);
+                        if(this.isLeader()){
+                            this.transition();
+                        }
                     }
-                    this.printAdjacent();
+                    //this.printAdjacent();
                     break;
 
 
@@ -185,6 +221,8 @@ public class Node {
     private void sendSearchMessage(){
         Message searchMessage = new Message(this.uid,this.coreMIN,this.level,MessageType.SEARCH);
         this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent).forEach(t -> this.sendMessage(searchMessage,t.uid));
+        this.convergeCastWait.clear();
+        this.convergeCastWait.addAll(this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent).map(t -> t.uid).collect(Collectors.toList()));
     }
     private void sendBroadcastMessage(Message broadcastMessage){
         this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent).forEach(t -> this.sendMessage(broadcastMessage,t.uid));
@@ -192,14 +230,17 @@ public class Node {
     private void sendTestMessage(){
         Message testMessage = new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_TEST);
         this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).forEach(t ->this.sendMessage(testMessage,t.uid));
+        this.testResponseWait.clear();
+        this.testResponseWait.addAll(this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).map(t -> t.uid).collect(Collectors.toList()));
     }
+
     private boolean isPartOfMWOE(Edge mwoe){
         return mwoe.getSource() == this.uid || mwoe.getDestination() == this.uid;
     }
     private void sendComponentMerge(Edge mwoe){
         if(this.isPartOfMWOE(mwoe)){
-            Message componentMerge = new Message(this.uid, mwoe.getSource(), this.level, MessageType.COMPONENT_MERGE,mwoe);
-            this.sendMessage(componentMerge, (mwoe.getSource() == this.uid)? mwoe.getDestination():mwoe.getSource());
+            Message componentMerge = new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_MERGE,mwoe);
+            this.sendMessage(componentMerge, mwoe.getOtherEnd(this.uid));
         }
     }
 
@@ -207,20 +248,28 @@ public class Node {
         List<Message> absorbRequests = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_MERGE && this.level > t.coreLevel).collect(Collectors.toList());
         absorbRequests.stream().forEach(t -> this.sendMessage(new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_MERGE,t.candidateMWOE),t.from));
         List<Integer> absorbedUIDs = absorbRequests.stream().map(t -> t.from).collect(Collectors.toList());
-        this.adjacentNodes.forEach(t-> t.edgeType = (absorbedUIDs.contains(t.uid)) ? IncidentEdgeType.BRANCH : t.edgeType);
+        this.updateEdgeType(absorbedUIDs,IncidentEdgeType.BRANCH);
         this.messageQueue.removeAll(absorbRequests);
     }
+    private void updateEdgeType(List<Integer> uids, IncidentEdgeType edgeType) {
+        for (AdjTuple tuple : this.adjacentNodes) {
+            if (uids.contains(tuple.uid)) {
+                tuple.edgeType = edgeType;
+            }
+        }
+    }
+    
     private Edge getMWOE(){
         return Node.findMinimum(this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).map(t -> new Edge(t.edgeWeight,t.uid,this.uid)).collect(Collectors.toList()));
     }
 
-    private List<Edge> getOutgoingEdges(){
+    private List<Edge> getBasicEdges(){
         return this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).map(t -> new Edge(t.edgeWeight,t.uid,this.uid)).collect(Collectors.toList());
     }
     
 
     private List<Message>getConvergeCastMessages(){
-        List<Message> convergeCastMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.MWOE_CONVERGECAST).collect(Collectors.toList());
+        List<Message> convergeCastMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.MWOE_CONVERGECAST || msg.messageType == MessageType.NO_MWOE).collect(Collectors.toList());
         return convergeCastMessages;
     }
 
@@ -255,7 +304,7 @@ public class Node {
                         try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
                             Message message;
                             while ((message = (Message)input.readObject()) != null) {
-                                messageQueue.add(message);
+                                this.addMessage(message);
                                 this.transition();
                             }
                         } catch (IOException | ClassNotFoundException e) {
@@ -309,30 +358,43 @@ public class Node {
     }
     
     
-
     private void sendMessage(Message inputMessage,int targetUID){
         //logic to send message
         this.adjacentNodes.stream().filter(t-> t.uid == targetUID).forEach(t -> {
             try {
-                this.sendMessageTCP(inputMessage,t.hostName,t.port);
+                if(!this.testingMode){
+                    this.sendMessageTCP(inputMessage,t.hostName,t.port);
+                }
             } catch (IOException e) {
                 //e.printStackTrace();
             }
         });
-
+        this.consolelog("message  to--->:" + targetUID + " content: " + inputMessage.toString());
     }
-
+    public synchronized void addMessage(Message inputMessage){
+        this.messageQueue.add(inputMessage);
+        this.consolelog("message  <--from:"+inputMessage.from + " content: " + inputMessage.toString());
+    }
     private void printAdjacent(){
         if(this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).count() == 0 ){
             System.out.println("All Branches in MST are determined .adjacent nodes for "+this.uid +":");
-            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH).forEach(t-> System.out.print("    ("+t.uid+" : "+t.hostName+")    "));
+            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH || t.edgeType == IncidentEdgeType.NOMWOE ).forEach(t-> System.out.println("    ("+t.uid+" : "+t.hostName+")    "));
         }else{
             System.out.println("SynchGHS is in progress .adjacent nodes for "+this.uid +":");
-            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH).forEach(t-> System.out.print("    ("+t.uid+" : "+t.hostName+")    "));
+            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH || t.edgeType == IncidentEdgeType.NOMWOE ).forEach(t-> System.out.println("    ("+t.uid+" : "+t.hostName+")    "));
         }
     }
+    private void consolelog(String msg){
+        if(this.logging){
+            System.out.println("uid:"+this.uid+" state:"+this.state.toString()+" coreID:"+this.coreMIN + " : "+msg);
+        }
+    }
+    public void setTestingMode(boolean mode){
+        this.testingMode = mode;
+    }
+    public NodeState getState(){
+        NodeState r = this.state;
+        return r;
+    }
 }
-
-
-
 
