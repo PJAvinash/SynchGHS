@@ -1,3 +1,4 @@
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -337,29 +338,35 @@ public class Node {
         ServerSocket serverSocket = new ServerSocket(port);
         this.transition();
         ExecutorService executor = Executors.newCachedThreadPool();
-        while (!this.synchGHSComplete) {
-            Socket clientSocket = serverSocket.accept();
-            executor.execute(() -> {
-                try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
-                    Message message;
-                    while ((message = (Message)input.readObject()) != null) {
-                        this.addMessage(message);
-                        this.transition();
-                    }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        clientSocket.close();
-                    } catch (IOException e) {
+        try {
+            while (!this.synchGHSComplete) {
+                Socket clientSocket = serverSocket.accept();
+                executor.execute(() -> {
+                    try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
+                        Message message;
+                        while (clientSocket.isConnected() && !clientSocket.isClosed() && (message = (Message) input.readObject()) != null) {
+                            this.addMessage(message);
+                            this.transition();
+                        }
+                    } catch (EOFException e) {
+                        // Stream ended normally, do nothing
+                    } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
+                    } finally {
+                        try {
+                            clientSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-            });
+                });
+            }
+        } finally {
+            serverSocket.close();
+            executor.shutdown();
         }
-        serverSocket.close();
-        executor.shutdown();
     }
+    
     
 
     public void sendMessageTCP(Message message, String host, int port) throws IOException {
