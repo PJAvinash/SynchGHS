@@ -180,9 +180,7 @@ public class Node {
                 case WAIT_FOR_COMPONENT_MERGE:
                     Edge mwoe = this.getMWOE();
                     int mwoe_otherend = mwoe.getOtherEnd(this.uid);
-                    List<Message> componentMergeMessages = this.messageQueue.stream()
-                            .filter(t -> t.messageType == MessageType.COMPONENT_MERGE && t.from == mwoe_otherend)
-                            .collect(Collectors.toList());
+                    List<Message> componentMergeMessages = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_MERGE && t.from == mwoe_otherend).collect(Collectors.toList());
                     if (componentMergeMessages.size() > 0) {
                         // Merge or Absorb
                         boolean isMerge = (componentMergeMessages.get(0).coreLevel == this.level);
@@ -247,6 +245,7 @@ public class Node {
         absorbRequests.stream().forEach(t -> this.sendMessage(new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_MERGE,t.candidateMWOE),t.from));
         List<Integer> absorbedUIDs = absorbRequests.stream().map(t -> t.from).collect(Collectors.toList());
         this.updateEdgeType(absorbedUIDs,IncidentEdgeType.BRANCH);
+        this.consolelog("absorbedUIDs:" + absorbedUIDs.toString());
         this.messageQueue.removeAll(absorbRequests);
     }
     private void updateEdgeType(List<Integer> uids, IncidentEdgeType edgeType) {
