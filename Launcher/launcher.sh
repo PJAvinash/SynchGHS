@@ -35,10 +35,10 @@ for remotehost in "${hostname_array[@]}"
 do
   # Skip the host machine
   if [[ "$remotehost" == "$host" ]]; then
-    java Main "Launcher/$configPath"
+    java Main "Launcher/$configPath" &
     continue
   fi
   echo "Starting main in $remotehost ..."
-  ssh -f $netID@$remotehost "cd DSProject2/SynchGHS && java Main Launcher/$configPath"
+  ssh -f $netID@$remotehost "cd DSProject2/SynchGHS && java Main Launcher/$configPath" &
   sleep 1
 done
