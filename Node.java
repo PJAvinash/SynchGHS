@@ -11,6 +11,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 
@@ -293,42 +295,70 @@ public class Node {
 
 
     // communication functions
+    // public void startListening() throws IOException {
+    //     ServerSocket serverSocket = new ServerSocket(port);
+    //     this.transition();
+    //     Thread listeningThread = new Thread(() -> {
+    //         try {
+    //             while (!this.synchGHSComplete) {
+    //                 Socket clientSocket = serverSocket.accept();
+    //                 new Thread(() -> {
+    //                     try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
+    //                         Message message;
+    //                         while ((message = (Message)input.readObject()) != null) {
+    //                             this.addMessage(message);
+    //                             this.transition();
+    //                         }
+    //                     } catch (IOException | ClassNotFoundException e) {
+    //                         e.printStackTrace();
+    //                     } finally {
+    //                         try {
+    //                             clientSocket.close();
+    //                         } catch (IOException e) {
+    //                             e.printStackTrace();
+    //                         }
+    //                     }
+    //                 }).start();
+    //             }
+    //         } catch (IOException e) {
+    //             e.printStackTrace();
+    //         } finally {
+    //             try {
+    //                 serverSocket.close();
+    //             } catch (IOException e) {
+    //                 e.printStackTrace();
+    //             }
+    //         }
+    //     });
+    //     listeningThread.start();
+    // }
+    
     public void startListening() throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
         this.transition();
-        Thread listeningThread = new Thread(() -> {
-            try {
-                while (!this.synchGHSComplete) {
-                    Socket clientSocket = serverSocket.accept();
-                    new Thread(() -> {
-                        try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
-                            Message message;
-                            while ((message = (Message)input.readObject()) != null) {
-                                this.addMessage(message);
-                                this.transition();
-                            }
-                        } catch (IOException | ClassNotFoundException e) {
-                            e.printStackTrace();
-                        } finally {
-                            try {
-                                clientSocket.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        while (!this.synchGHSComplete) {
+            Socket clientSocket = serverSocket.accept();
+            executor.execute(() -> {
+                try (ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream())) {
+                    Message message;
+                    while ((message = (Message)input.readObject()) != null) {
+                        this.addMessage(message);
+                        this.transition();
+                    }
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
+                } finally {
+                    try {
+                        clientSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-        listeningThread.start();
+            });
+        }
+        serverSocket.close();
+        executor.shutdown();
     }
     
 
