@@ -112,7 +112,8 @@ public class Node {
                         //Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
                         //check if all the responses from
                         this.consolelog("BASIC: " + this.getBasicEdges().size() + " NO_MWOE: " + convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).count());
-                        if(this.getBasicEdges().size() == 0 && this.getActiveBranchEdges().size() == 0){
+                        List<Message> activeMessagesFromConvergeCast = convergeCastMessages.stream().filter( t -> t.messageType != MessageType.NO_MWOE).collect(Collectors.toList); 
+                        if(this.getBasicEdges().size() == 0 && activeMessagesFromConvergeCast.size() == 0){
                             //Algorithm terminated. for this node. print tree and send response to parent.
                             this.printAdjacent();
                             if(!this.isLeader()){
@@ -122,16 +123,16 @@ public class Node {
                             break;
                         }
                         Edge minEdge = null;
-                        if(this.getBasicEdges().size() == 0  && this.getActiveBranchEdges().size() != 0){
+                        if(this.getBasicEdges().size() == 0  && activeMessagesFromConvergeCast.size() != 0){
                             // find the minimum edge and forward it to parent.
                             minEdge = Node.getCandidateMWOE(convergeCastMessages);
                         }
-                        if(this.getBasicEdges().size() != 0  && this.getActiveBranchEdges().size() == 0){
+                        if(this.getBasicEdges().size() != 0  && activeMessagesFromConvergeCast.size() == 0){
                             // find the min edge and forward it to parent.
                             minEdge = this.getMWOE();
                         }
                         // This needs a change. 
-                        if(this.getBasicEdges().size() != 0  && this.getActiveBranchEdges().size() != 0){
+                        if(this.getBasicEdges().size() != 0  && activeMessagesFromConvergeCast.size() != 0){
                             // find the min edge and forward it to parent.
                             this.consolelog("convergeCastMessages:" + convergeCastMessages.size());
                             minEdge = Edge.min(Node.getCandidateMWOE(convergeCastMessages), this.getMWOE());
