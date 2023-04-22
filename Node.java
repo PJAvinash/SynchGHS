@@ -91,7 +91,7 @@ public class Node {
                         this.transition();
                     }else{
                         //Non-leader
-                        List<Message> searchMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.SEARCH && msg.from == this.parent).collect(Collectors.toList());
+                        List<Message> searchMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.SEARCH).collect(Collectors.toList());
                         if(searchMessages.size() > 0 ){
                             this.state = NodeState.SEARCH_MWOE;
                             this.parent = searchMessages.get(0).from;
