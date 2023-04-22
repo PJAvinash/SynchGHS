@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -32,8 +33,8 @@ public class Node {
     private NodeState state;
 
     //bookkeeping variables
-    private Set<Integer> convergeCastWait = new HashSet<>();
-    private Set<Integer> testResponseWait = new HashSet<>();
+    private Set<Integer> convergeCastWait = Collections.synchronizedSet(new HashSet<>());
+    private Set<Integer> testResponseWait = Collections.synchronizedSet(new HashSet<>());
 
     private ArrayList<AdjTuple> adjacentNodes = new ArrayList<AdjTuple>();
     private List<Message> messageQueue = Collections.synchronizedList(new ArrayList<Message>());
@@ -115,6 +116,7 @@ public class Node {
                         //Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
                         //check if all the responses from
                         this.consolelog("BASIC: " + this.getBasicEdges().size() + " NO_MWOE: " + convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).count());
+                        this.consolelog("convergeCastMessages: " + Node.collectionToCsvString(convergeCastMessages) + " ConvergeCast: " + Node.collectionToCsvString(convergeCastWait));
                         List<Message> activeMessagesFromConvergeCast = convergeCastMessages.stream().filter( t -> t.messageType != MessageType.NO_MWOE).collect(Collectors.toList()); 
                         if(this.getBasicEdges().size() == 0 && activeMessagesFromConvergeCast.size() == 0){
                             //Algorithm terminated. for this node. print tree and send response to parent.
@@ -457,6 +459,13 @@ public class Node {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public static String collectionToCsvString(Collection<?> collection) {
+        CharSequence[] elements = collection.stream()
+                                      .map(String::valueOf)
+                                      .toArray(CharSequence[]::new);
+        return String.join(",", elements);
     }
 }
 
