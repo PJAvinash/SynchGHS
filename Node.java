@@ -78,28 +78,28 @@ public class Node {
                         if(this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH).count() == 0){
                             List<Edge> adjacentEdges = this.adjacentNodes.stream().map(t -> new Edge(t.edgeWeight,t.uid,this.uid)).collect(Collectors.toList());
                             Edge minEdge = Node.findMinimum(adjacentEdges);
-                            this.sendComponentMerge(minEdge); 
                             this.state = NodeState.WAIT_FOR_COMPONENT_MERGE;
+                            this.sendComponentMerge(minEdge); 
                         }
                         else{
+                            this.state = NodeState.SEARCH_MWOE;
                             this.sendTestMessage();
                             this.sendSearchMessage();
-                            this.state = NodeState.SEARCH_MWOE; 
                         }
                         this.transition();
                     }else{
                         //Non-leader
-                        List<Integer> branchUIDs = this.adjacentNodes.stream().filter(t->t.edgeType ==IncidentEdgeType.BRANCH).map(t->t.uid).collect(Collectors.toList());
-                        List<Message> searchMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.SEARCH && branchUIDs.contains(msg.from)).collect(Collectors.toList());
+                        List<Message> searchMessages = this.messageQueue.stream().filter(msg -> msg.messageType == MessageType.SEARCH && msg.from == this.parent).collect(Collectors.toList());
                         if(searchMessages.size() > 0 ){
+                            this.state = NodeState.SEARCH_MWOE;
                             this.parent = searchMessages.get(0).from;
                             this.coreMIN = searchMessages.get(0).coreMIN;
                             this.level = searchMessages.get(0).coreLevel;
 
+                            Message broadCastMessage = new Message(this.uid, this.coreMIN, this.level, MessageType.SEARCH);
                             this.sendTestMessage();
-                            this.sendSearchMessage();
+                            this.sendBroadcastMessage(broadCastMessage);
                             this.messageQueue.removeAll(searchMessages);
-                            this.state = NodeState.SEARCH_MWOE;
                             this.transition();
                         }
                     }
@@ -150,26 +150,25 @@ public class Node {
                             break;
                         }
                         //
+                        this.messageQueue.removeAll(convergeCastMessages);
+                        convergeCastWait.clear();
                         if(this.isLeader()){
                             Message broadcastMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.MWOE_BROADCAST, minEdge);
                             this.sendBroadcastMessage(broadcastMWOE);
                             if (this.isPartOfMWOE(minEdge)) {
-                                this.sendComponentMerge(minEdge);
                                 this.state = NodeState.WAIT_FOR_COMPONENT_MERGE;
+                                this.sendComponentMerge(minEdge); 
+                                this.transition(); 
                             } else {
                                 this.state = NodeState.INITIAL;
                             }
                         }else{
+                            //converge cast to parent
+                            this.state = NodeState.WAIT_FOR_MWOE_BROADCAST;
                             Message responseToParent = new Message(this.uid, this.coreMIN, this.level,
                                     MessageType.MWOE_CONVERGECAST, minEdge);
                             this.sendMessage(responseToParent, this.parent);
-                            // update state
-                            this.state = NodeState.WAIT_FOR_MWOE_BROADCAST;
-                            
                         }
-                        this.messageQueue.removeAll(convergeCastMessages);
-                        convergeCastWait.clear();
-                        this.transition();
                     }
                     break;
                 case WAIT_FOR_MWOE_BROADCAST:
@@ -178,14 +177,14 @@ public class Node {
                         if (mwoeBroadcast.size() > 0) {
                             Message mwoeBroadcastMessage = new Message(this.uid, this.coreMIN,this.level, MessageType.MWOE_BROADCAST, mwoeBroadcast.get(0).candidateMWOE);
                             this.sendBroadcastMessage(mwoeBroadcastMessage);
+                            this.messageQueue.removeAll(mwoeBroadcast);
                             if(this.isPartOfMWOE(mwoeBroadcast.get(0).candidateMWOE)){
-                                this.sendComponentMerge(mwoeBroadcast.get(0).candidateMWOE);
                                 this.state  = NodeState.WAIT_FOR_COMPONENT_MERGE;
+                                this.sendComponentMerge(mwoeBroadcast.get(0).candidateMWOE);
+                                this.transition();
                             }else{
                                 this.state  = NodeState.INITIAL;
                             }
-                            this.messageQueue.removeAll(mwoeBroadcast);
-                            this.transition();
                         }
                     }
                     break;
@@ -196,9 +195,15 @@ public class Node {
                     if (componentMergeMessages.size() > 0) {
                         // Merge or Absorb
                         boolean isMerge = (componentMergeMessages.get(0).coreLevel == this.level);
-                        int newLevel = isMerge ? this.level + 1: Math.max(this.level, componentMergeMessages.get(0).coreLevel);
-                        this.level = newLevel;
-                        this.coreMIN = isMerge ? mwoe.getSource():componentMergeMessages.get(0).coreMIN;
+                        if(isMerge){
+                            this.level = this.level+1;
+                            this.coreMIN = Math.min(mwoe.getSource(),mwoe.getDestination());
+                            this.parent = this.coreMIN;
+                        }else{
+                            this.level = Math.max(this.level, componentMergeMessages.get(0).coreLevel);
+                            this.coreMIN = componentMergeMessages.get(0).coreMIN;
+                            this.parent = mwoe_otherend;
+                        }
                         this.state = NodeState.INITIAL;
                         this.updateEdgeType(Arrays.asList(mwoe_otherend),IncidentEdgeType.BRANCH);
                         this.messageQueue.removeAll(componentMergeMessages);
