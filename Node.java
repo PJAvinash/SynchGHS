@@ -109,14 +109,8 @@ public class Node {
                     break;
                 case SEARCH_MWOE:
                     List<Message> convergeCastMessages = this.getConvergeCastMessages();
-                    List<Integer> componentRejectResponseUIDS = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_REJECT).map(t -> t.from).collect(Collectors.toList());
-                    Set<Integer> componentAcceptResponeUIDS = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_ACCEPT).map(t -> t.from).collect(Collectors.toSet());
-                    this.updateEdgeType(componentRejectResponseUIDS, IncidentEdgeType.REJECTED);
                     this.updateEdgeType(convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).map(t->t.from).collect(Collectors.toList()),IncidentEdgeType.NOMWOE);
-                    
-                    this.testResponseWait.removeAll(componentRejectResponseUIDS);
-                    this.testResponseWait.removeAll(componentAcceptResponeUIDS);
-                    this.messageQueue.removeAll(this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_REJECT || t.messageType == MessageType.COMPONENT_ACCEPT).collect(Collectors.toList()));
+                    this.handleTestResponse();
                     if(convergeCastMessages.size() == this.convergeCastWait.size()){
                         //Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
                         //check if all the responses from
@@ -232,6 +226,15 @@ public class Node {
         this.messageQueue.removeAll(messagesToRespond);
     }
 
+    private void handleTestResponse(){
+        List<Integer> componentRejectResponseUIDS = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_REJECT).map(t -> t.from).collect(Collectors.toList());
+        Set<Integer> componentAcceptResponeUIDS = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_ACCEPT).map(t -> t.from).collect(Collectors.toSet());
+        this.updateEdgeType(componentRejectResponseUIDS, IncidentEdgeType.REJECTED);
+        this.testResponseWait.removeAll(componentRejectResponseUIDS);
+        this.testResponseWait.removeAll(componentAcceptResponeUIDS);
+        this.messageQueue.removeAll(this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_REJECT).collect(Collectors.toList()));
+    }
+
     
 
     private void sendSearchMessage(){
@@ -246,6 +249,8 @@ public class Node {
     private void sendTestMessage(){
         Message testMessage = new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_TEST);
         this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).forEach(t ->this.sendMessage(testMessage,t.uid));
+        //remove old accept messages.
+        this.messageQueue.removeAll(this.messageQueue.stream().filter(t-> t.messageType == MessageType.COMPONENT_ACCEPT).collect(Collectors.toList()));
         this.testResponseWait.clear();
         this.testResponseWait.addAll(this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).map(t -> t.uid).collect(Collectors.toList()));
     }
