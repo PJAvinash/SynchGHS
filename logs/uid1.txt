@@ -18,6 +18,7 @@ uid:9 state:SEARCH_MWOE coreID:9 :  absorbedUIDs: []
 uid:9 state:SEARCH_MWOE coreID:9 : message  <--from:78 content: {"from":78,"coreMIN":9,"coreLevel":1,"messageType":"MWOE_CONVERGECAST","candidateMWOE":{"W":8,"S":21,"D":78}}
 uid:9 state:SEARCH_MWOE coreID:9 :  absorbedUIDs: []
 uid:9 state:SEARCH_MWOE coreID:9 : BASIC: 1 NO_MWOE: 0
+uid:9 state:SEARCH_MWOE coreID:9 : convergeCastMessages: {"from":78,"coreMIN":9,"coreLevel":1,"messageType":"MWOE_CONVERGECAST","candidateMWOE":{"W":8,"S":21,"D":78}} ConvergeCast: 78
 uid:9 state:SEARCH_MWOE coreID:9 : convergeCastMessages:1
 uid:9 state:SEARCH_MWOE coreID:9 : message  to--->:78 content: {"from":9,"coreMIN":9,"coreLevel":1,"messageType":"MWOE_BROADCAST","candidateMWOE":{"W":8,"S":21,"D":78}}
 uid:9 state:SEARCH_MWOE coreID:9 : message  to--->:153 content: {"from":9,"coreMIN":9,"coreLevel":1,"messageType":"MWOE_BROADCAST","candidateMWOE":{"W":8,"S":21,"D":78}}
@@ -27,5 +28,6 @@ uid:9 state:SEARCH_MWOE coreID:21 : message  to--->:200 content: {"from":9,"core
 uid:9 state:SEARCH_MWOE coreID:21 : message  to--->:153 content: {"from":9,"coreMIN":21,"coreLevel":2,"messageType":"SEARCH"}
 uid:9 state:SEARCH_MWOE coreID:21 :  absorbedUIDs: []
 uid:9 state:SEARCH_MWOE coreID:21 : BASIC: 1 NO_MWOE: 0
+uid:9 state:SEARCH_MWOE coreID:21 : convergeCastMessages:  ConvergeCast: 
 uid:9 state:SEARCH_MWOE coreID:21 : message  <--from:153 content: {"from":153,"coreMIN":21,"coreLevel":2,"messageType":"NO_MWOE"}
 uid:9 state:SEARCH_MWOE coreID:21 :  absorbedUIDs: []

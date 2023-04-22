@@ -99,10 +99,9 @@ public class Node {
                             this.coreMIN = searchMessages.get(0).coreMIN;
                             this.level = searchMessages.get(0).coreLevel;
                             this.coreIDKnown = true;
-
-                            Message broadCastMessage = new Message(this.uid, this.coreMIN, this.level, MessageType.SEARCH);
+                            
                             this.sendTestMessage();
-                            this.sendBroadcastMessage(broadCastMessage);
+                            this.sendSearchMessage();
                             this.messageQueue.removeAll(searchMessages);
                             this.transition();
                         }
