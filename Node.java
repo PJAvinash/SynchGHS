@@ -400,8 +400,8 @@ public class Node {
     }
     private void printAdjacent(){
         if(this.adjacentNodes.stream().filter(t->t.edgeType == IncidentEdgeType.BASIC).count() == 0 ){
-            System.out.println("All Branches in MST are determined .adjacent nodes for "+this.uid +":");
-            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH || t.edgeType == IncidentEdgeType.NOMWOE ).forEach(t-> System.out.println("    ("+t.uid+" : "+t.hostName+")    "));
+            System.out.println("All Branches in MST are determined .adjacent nodes for : " + this.uid + "  parent: " + this.parent);
+            this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH || t.edgeType == IncidentEdgeType.NOMWOE ).forEach(t-> System.out.println(this.uid+":    ("+t.uid+" : "+t.hostName+")    "));
         }else{
             System.out.println("SynchGHS is in progress .adjacent nodes for "+this.uid +":");
             this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH || t.edgeType == IncidentEdgeType.NOMWOE ).forEach(t-> System.out.println("    ("+t.uid+" : "+t.hostName+")    "));
