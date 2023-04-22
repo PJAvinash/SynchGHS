@@ -11,7 +11,7 @@ with open('logs.txt', 'r') as f:
 print(len(lines))
 uid1_lines = []
 for line in lines:
-    if line.startswith("uid:1"):
+    if line.startswith("uid:21 "):
         uid1_lines.append(line)
 
 # Write the lines starting with 'uid: 1' to a log file

@@ -82,10 +82,11 @@ public class Node {
                             this.state = NodeState.WAIT_FOR_COMPONENT_MERGE;
                         }
                         else{
-                            this.state = NodeState.SEARCH_MWOE;
                             this.sendTestMessage();
                             this.sendSearchMessage();
+                            this.state = NodeState.SEARCH_MWOE; 
                         }
+                        this.transition();
                     }else{
                         //Non-leader
                         List<Integer> branchUIDs = this.adjacentNodes.stream().filter(t->t.edgeType ==IncidentEdgeType.BRANCH).map(t->t.uid).collect(Collectors.toList());
@@ -94,10 +95,12 @@ public class Node {
                             this.parent = searchMessages.get(0).from;
                             this.coreMIN = searchMessages.get(0).coreMIN;
                             this.level = searchMessages.get(0).coreLevel;
-                            this.state = NodeState.SEARCH_MWOE;
+
                             this.sendTestMessage();
                             this.sendSearchMessage();
                             this.messageQueue.removeAll(searchMessages);
+                            this.state = NodeState.SEARCH_MWOE;
+                            this.transition();
                         }
                     }
                     break;
@@ -165,7 +168,8 @@ public class Node {
                             
                         }
                         this.messageQueue.removeAll(convergeCastMessages);
-                        //convergeCastWait.clear();
+                        convergeCastWait.clear();
+                        this.transition();
                     }
                     break;
                 case WAIT_FOR_MWOE_BROADCAST:
@@ -181,6 +185,7 @@ public class Node {
                                 this.state  = NodeState.INITIAL;
                             }
                             this.messageQueue.removeAll(mwoeBroadcast);
+                            this.transition();
                         }
                     }
                     break;
@@ -200,8 +205,6 @@ public class Node {
                         this.transition();
                     }
                     break;
-
-
             }//end switch state
         }//end if
     }
