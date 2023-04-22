@@ -27,8 +27,10 @@ public class Node {
     private int port;
     private int level;
     private int coreMIN;
+    private boolean coreIDKnown = true;
     private int parent;
     private NodeState state;
+
     //bookkeeping variables
     private Set<Integer> convergeCastWait = new HashSet<>();
     private Set<Integer> testResponseWait = new HashSet<>();
@@ -95,6 +97,7 @@ public class Node {
                             this.parent = searchMessages.get(0).from;
                             this.coreMIN = searchMessages.get(0).coreMIN;
                             this.level = searchMessages.get(0).coreLevel;
+                            this.coreIDKnown = true;
 
                             Message broadCastMessage = new Message(this.uid, this.coreMIN, this.level, MessageType.SEARCH);
                             this.sendTestMessage();
@@ -160,6 +163,8 @@ public class Node {
                                 this.sendComponentMerge(minEdge); 
                                 this.transition(); 
                             } else {
+                                // so that this node doesnt assume it is leader anymore.
+                                this.coreIDKnown = false;
                                 this.state = NodeState.INITIAL;
                             }
                         }else{
@@ -293,7 +298,7 @@ public class Node {
     }
 
     private boolean isLeader(){
-        return (this.coreMIN == this.uid);
+        return (this.coreMIN == this.uid) && this.coreIDKnown;
     }
 
     public static Edge findMinimum(List<Edge> tupleList) {
