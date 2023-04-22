@@ -15,12 +15,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
+import java.io.FileWriter;
 
 public class Node {
     private boolean synchGHSComplete = false;
     private Object lock = new Object();
-    private boolean logging =false;
+    private boolean logging =true;
     private boolean testingMode = false;
     private int uid;
     private String hostName;
@@ -35,6 +35,9 @@ public class Node {
 
     private ArrayList<AdjTuple> adjacentNodes = new ArrayList<AdjTuple>();
     private List<Message> messageQueue = Collections.synchronizedList(new ArrayList<Message>());
+
+    private List<Message> inMessages = Collections.synchronizedList(new ArrayList<Message>());
+    private List<Message> outMessages = Collections.synchronizedList(new ArrayList<Message>());
 
     public Node(int uid,String hostName,int port){
         this.uid = uid;
@@ -116,6 +119,7 @@ public class Node {
                         if(this.getBasicEdges().size() == 0 && activeMessagesFromConvergeCast.size() == 0){
                             //Algorithm terminated. for this node. print tree and send response to parent.
                             this.printAdjacent();
+                            this.writeIO();
                             if(!this.isLeader()){
                                 Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
                                 this.sendMessage(NoMWOE, this.parent);
@@ -368,10 +372,12 @@ public class Node {
                 //e.printStackTrace();
             }
         });
+        this.outMessages.add(inputMessage);
         this.consolelog("message  to--->:" + targetUID + " content: " + inputMessage.toString());
     }
     public synchronized void addMessage(Message inputMessage){
         this.messageQueue.add(inputMessage);
+        this.inMessages.add(inputMessage);
         this.consolelog("message  <--from:"+inputMessage.from + " content: " + inputMessage.toString());
     }
     private void printAdjacent(){
@@ -398,6 +404,41 @@ public class Node {
     public int getCoreID(){
         int cid = this.coreMIN;
         return cid;
+    }
+
+    public static void writeMessagesToJsonFile(List<Message> messages, String fileName) throws IOException {
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(fileName);
+            fileWriter.write("[");
+            for (int i = 0; i < messages.size(); i++) {
+                Message message = messages.get(i);
+                fileWriter.write(message.toString());
+                if (i < messages.size() - 1) {
+                    fileWriter.write(",");
+                }
+            }
+            fileWriter.write("]");
+            fileWriter.flush();
+           
+        } 
+        finally {
+            if (fileWriter != null) {
+                fileWriter.close();
+            }
+        }
+    }
+
+    public void writeIO(){
+        String inPath = "logs/" + this.uid+ "in.json";
+        String outPath = "logs/" + this.uid+ "out.json";
+        try {
+            Node.writeMessagesToJsonFile(this.inMessages,inPath);
+            Node.writeMessagesToJsonFile(this.outMessages,outPath);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
 
