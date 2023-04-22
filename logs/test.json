@@ -1,0 +1,36 @@
+[
+    {
+        "from": 8,
+        "coreMIN": 8,
+        "coreLevel": 0,
+        "messageType": "COMPONENT_MERGE",
+        "candidateMWOE": {
+            "W": 1,
+            "S": 8,
+            "D": 88
+        }
+    },
+    {
+        "from": 8,
+        "coreMIN": 8,
+        "coreLevel": 1,
+        "messageType": "SEARCH"
+    },
+    {
+        "from": 184,
+        "coreMIN": 184,
+        "coreLevel": 0,
+        "messageType": "COMPONENT_MERGE",
+        "candidateMWOE": {
+            "W": 2,
+            "S": 88,
+            "D": 184
+        }
+    },
+    {
+        "from": 184,
+        "coreMIN": 8,
+        "coreLevel": 1,
+        "messageType": "COMPONENT_REJECT"
+    }
+]
