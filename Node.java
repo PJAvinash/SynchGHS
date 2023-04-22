@@ -130,8 +130,10 @@ public class Node {
                             // find the min edge and forward it to parent.
                             minEdge = this.getMWOE();
                         }
+                        // This needs a change. 
                         if(this.getBasicEdges().size() != 0  && this.getActiveBranchEdges().size() != 0){
                             // find the min edge and forward it to parent.
+                            this.consolelog("convergeCastMessages:" + convergeCastMessages.size());
                             minEdge = Edge.min(Node.getCandidateMWOE(convergeCastMessages), this.getMWOE());
                             
                         }
@@ -158,6 +160,7 @@ public class Node {
                             
                         }
                         this.messageQueue.removeAll(convergeCastMessages);
+                        //convergeCastWait.clear();
                     }
                     break;
                 case WAIT_FOR_MWOE_BROADCAST:
