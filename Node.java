@@ -277,8 +277,10 @@ public class Node {
         this.updateEdgeType(absorbedUIDs,IncidentEdgeType.BRANCH);
         this.consolelog(" absorbedUIDs: " + absorbedUIDs.toString());
         this.messageQueue.removeAll(absorbRequests);
-        //send search messages and wait.
-        this.sendSearchMessage();
+        //send search messages and wait if there is an absoption.
+        if(absorbedUIDs.size() > 0 ){
+            this.sendSearchMessage();
+        }
     }
     private void updateEdgeType(List<Integer> uids, IncidentEdgeType edgeType) {
         for (AdjTuple t : this.adjacentNodes) {
