@@ -463,7 +463,6 @@ public class Node {
             Node.writeMessagesToJsonFile(this.inMessages,inPath);
             Node.writeMessagesToJsonFile(this.outMessages,outPath);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
