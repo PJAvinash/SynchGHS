@@ -99,7 +99,7 @@ public class Node {
                             this.coreMIN = searchMessages.get(0).coreMIN;
                             this.level = searchMessages.get(0).coreLevel;
                             this.coreIDKnown = true;
-                            
+
                             this.sendTestMessage();
                             this.sendSearchMessage();
                             this.messageQueue.removeAll(searchMessages);
@@ -111,7 +111,8 @@ public class Node {
                     List<Message> convergeCastMessages = this.getConvergeCastMessages();
                     this.updateEdgeType(convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).map(t->t.from).collect(Collectors.toList()),IncidentEdgeType.NOMWOE);
                     this.handleTestResponse();
-                    if(convergeCastMessages.size() == this.convergeCastWait.size()){
+                    Set<Integer> searchResponsesReceivedFrom = convergeCastMessages.stream().map( t -> t.from).collect(Collectors.toSet());
+                    if(searchResponsesReceivedFrom.equals(this.convergeCastWait)){
                         //Edge minEdge = Edge.min(convergeCastMWOE, this.getMWOE());
                         //check if all the responses from
                         this.consolelog("BASIC: " + this.getBasicEdges().size() + " NO_MWOE: " + convergeCastMessages.stream().filter(t -> t.messageType == MessageType.NO_MWOE).count());
@@ -125,6 +126,7 @@ public class Node {
                                 Message NoMWOE = new Message(this.uid, this.coreMIN, this.level,MessageType.NO_MWOE);
                                 this.sendMessage(NoMWOE, this.parent);
                             }
+                            convergeCastWait.clear();
                             break;
                         }
                         Edge minEdge = null;
@@ -239,10 +241,11 @@ public class Node {
     
 
     private void sendSearchMessage(){
+        // sends messages only to those to whom search message isn't sent.
         Message searchMessage = new Message(this.uid,this.coreMIN,this.level,MessageType.SEARCH);
-        this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent).forEach(t -> this.sendMessage(searchMessage,t.uid));
-        this.convergeCastWait.clear();
-        this.convergeCastWait.addAll(this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent).map(t -> t.uid).collect(Collectors.toList()));
+        List<Integer> searchMessagesToBeSent = this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent && !(this.convergeCastWait.contains(t.uid))).map(t -> t.uid).collect(Collectors.toList());
+        searchMessagesToBeSent.forEach(t -> this.sendMessage(searchMessage,t));
+        this.convergeCastWait.addAll(searchMessagesToBeSent);
     }
     private void sendBroadcastMessage(Message broadcastMessage){
         this.adjacentNodes.stream().filter(t -> t.edgeType == IncidentEdgeType.BRANCH && t.uid != this.parent).forEach(t -> this.sendMessage(broadcastMessage,t.uid));
@@ -268,11 +271,14 @@ public class Node {
 
     private void absorb(){
         List<Message> absorbRequests = this.messageQueue.stream().filter(t -> t.messageType == MessageType.COMPONENT_MERGE && this.level > t.coreLevel).collect(Collectors.toList());
-        absorbRequests.stream().forEach(t -> this.sendMessage(new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_MERGE,t.candidateMWOE),t.from));
+        Message absorbMessage = new Message(this.uid, this.coreMIN, this.level, MessageType.COMPONENT_MERGE);
+        absorbRequests.stream().forEach(t -> this.sendMessage(absorbMessage,t.from));
         List<Integer> absorbedUIDs = absorbRequests.stream().map(t -> t.from).collect(Collectors.toList());
         this.updateEdgeType(absorbedUIDs,IncidentEdgeType.BRANCH);
         this.consolelog(" absorbedUIDs: " + absorbedUIDs.toString());
         this.messageQueue.removeAll(absorbRequests);
+        //send search messages and wait.
+        this.sendSearchMessage();
     }
     private void updateEdgeType(List<Integer> uids, IncidentEdgeType edgeType) {
         for (AdjTuple t : this.adjacentNodes) {
