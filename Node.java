@@ -21,7 +21,7 @@ import java.io.FileWriter;
 public class Node {
     private boolean synchGHSComplete = false;
     private Object lock = new Object();
-    private boolean logging =true;
+    private boolean logging =false;
     private boolean testingMode = false;
     private int uid;
     private String hostName;
