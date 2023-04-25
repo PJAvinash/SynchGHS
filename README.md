@@ -2,7 +2,7 @@
 Name : Jayanth Avinash Potnuru
 NetID: JXP220032
 
-Algorithm's implemented: 
+Algorithm implemented: 
 SynchGHS
 Programming language: Java 
 
