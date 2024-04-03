@@ -1,9 +1,9 @@
 # SynchGHS algorithm 
 ## for Minimum spanning tree construction in a Distributed System
 
-**  For details on algorithm /proof of correctness/complexity analysis, refer to Chapter 4.4 of Nancy A Lynch's book on distributed computing. chapter 4.4
+* For details on algorithm /proof of correctness/complexity analysis, refer to Chapter 4.4 of Nancy A Lynch's book on distributed computing. chapter 4.4
 
-** Compilation order: **
+## Compilation order: 
 - IncidentEdgeType.java
 - AdjTuple.java
 - Edge.java
