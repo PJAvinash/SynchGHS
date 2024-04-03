@@ -27,7 +27,7 @@ Give the path as per your configuration
 Reading the config file embedded in Main it takes the file path as a parameter.
 
 # Contributers
-** PJ Avinash **
+- PJ Avinash 
 
 
 
