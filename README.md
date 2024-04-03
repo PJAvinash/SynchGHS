@@ -1,26 +1,35 @@
+# SynchGHS algorithm 
+## for Minimum spanning tree construction in a Distributed System
 
-Name : Jayanth Avinash Potnuru
-NetID: JXP220032
+**  For details on algorithm /proof of correctness/complexity analysis, refer to Chapter 4.4 of Nancy A Lynch's book on distributed computing. chapter 4.4
 
-Algorithm implemented: 
-SynchGHS
-Programming language: Java 
+** Compilation order: **
+- IncidentEdgeType.java
+- AdjTuple.java
+- Edge.java
+- MessageType.java
+- Message.java
+- NodeState.java
+- Node.java
+- Main.java
 
-Compiliation order:
+you can also use 
+```
+javac Main
+```
+** for running the project ** 
+```
+cd Launcher &  chmod +x launcher.sh & ./launcher.sh "config001.txt"
+```
+Give the path as per your configuration
 
-IncidentEdgeType.java
-AdjTuple.java
-Edge.java
-MessageType.java
-Message.java
-NodeState.java
-Node.java
-Main.java
+** Note **: The message types used here might be slightly different from the ones in the textbook 
+Reading the config file embedded in Main it takes the file path as a parameter.
 
-Code available at https://github.com/PJAvinash/SynchGHS/tree/main
+#Contributers
+** PJ Avinash **
 
-Note: the Message types used here might be slightly different from the ones in textbook 
-Reading the config file is embedded in Main it takes the file path as parameter.
+
 
 
 
